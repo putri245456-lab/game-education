@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco-Quest: Penyelamat Lingkungan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0f172a;
+            color: white;
+            overflow: hidden;
+            margin: 0;
+            touch-action: manipulation;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        .card-glow {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
+
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .animate-float {
+            animation: bounce-slow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+
+    <!-- Game Container -->
+    <div id="game-container" class="max-w-md w-full bg-slate-800 rounded-3xl overflow-hidden shadow-2xl relative border-4 border-slate-700">
+        
+        <!-- Header Info -->
+        <div class="p-6 flex justify-between items-center bg-slate-900/50">
+            <div>
+                <p class="text-xs text-slate-400 uppercase tracking-widest">Skor Anda</p>
+                <p id="score-display" class="text-2xl font-bold text-green-400">0 / 1000</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-slate-400 uppercase tracking-widest">Level</p>
+                <p id="level-display" class="text-2xl font-bold text-blue-400">1</p>
+            </div>
+        </div>
+
+        <!-- Progress Bar Container -->
+        <div class="w-full h-2 bg-slate-700">
+            <div id="score-progress" class="h-full bg-green-500 progress-bar" style="width: 0%"></div>
+        </div>
+
+        <!-- Main Screen -->
+        <div id="screen-start" class="p-8 text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center animate-float shadow-lg shadow-green-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+            <h1 class="text-3xl font-extrabold mb-4 text-white">Eco-Quest</h1>
+            <p class="text-slate-400 mb-8">Uji pengetahuanmu tentang dunia dan lingkungan untuk mencapai skor 1000!</p>
+            <button onclick="startGame()" class="w-full py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-all transform active:scale-95 shadow-lg shadow-green-500/30">
+                MULAI PETUALANGAN
+            </button>
+        </div>
+
+        <!-- Question Screen (Hidden initially) -->
+        <div id="screen-quiz" class="p-8 hidden">
+            <div id="question-box" class="mb-8">
+                <span id="category-tag" class="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-semibold mb-3">BIOLOGI</span>
+                <h2 id="question-text" class="text-xl font-semibold leading-relaxed">Apa fungsi utama dari klorofil pada tumbuhan hijau?</h2>
+            </div>
+
+            <div id="options-container" class="space-y-3">
+                <!-- Buttons will be injected here -->
+            </div>
+        </div>
+
+        <!-- Win Screen (Hidden initially) -->
+        <div id="screen-win" class="p-8 text-center hidden">
+            <div class="mb-6 flex justify-center">
+                <div class="w-24 h-24 bg-yellow-500 rounded-full flex items-center justify-center animate-bounce shadow-lg shadow-yellow-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
+                    </svg>
+                </div>
+            </div>
+            <h1 class="text-3xl font-extrabold mb-2 text-yellow-400">MISI BERHASIL!</h1>
+            <p class="text-slate-300 mb-8">Selamat! Kamu telah mencapai skor 1000 dan menjadi Penjaga Bumi sejati.</p>
+            <button onclick="location.reload()" class="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/30">
+                MAIN LAGI
+            </button>
+        </div>
+
+        <!-- Notification -->
+        <div id="feedback" class="absolute bottom-4 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full font-bold text-sm opacity-0 transition-opacity pointer-events-none">
+            Benar! +100
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // BIOLOGI
+            { q: "Apa nama organel sel yang berfungsi sebagai tempat respirasi sel?", a: ["Mitokondria", "Ribosom", "Lisosom", "Badan Golgi"], correct: 0, cat: "BIOLOGI" },
+            { q: "Komponen biotik dalam ekosistem adalah...", a: ["Tanah", "Tumbuhan", "Air", "Udara"], correct: 1, cat: "BIOLOGI" },
+            { q: "Virus dianggap sebagai makhluk tak hidup karena...", a: ["Dapat bereplikasi", "Memiliki DNA", "Dapat dikristalkan", "Memiliki kapsid"], correct: 2, cat: "BIOLOGI" },
+            // EKONOMI
+            { q: "Masalah pokok ekonomi modern adalah...", a: ["What, How, For Whom", "Produksi & Konsumsi", "Kelangkaan", "Inflasi"], correct: 0, cat: "EKONOMI" },
+            { q: "Siapa bapak ekonomi dunia?", a: ["Karl Marx", "Adam Smith", "John Keynes", "Moh. Hatta"], correct: 1, cat: "EKONOMI" },
+            // SEJARAH & SOSIAL
+            { q: "Zaman di mana manusia belum mengenal tulisan disebut...", a: ["Paleolitikum", "Praaksara", "Megalitikum", "Neolitikum"], correct: 1, cat: "SEJARAH" },
+            { q: "Interaksi sosial yang mengarah pada perpecahan disebut...", a: ["Asosiatif", "Disosiatif", "Asimilasi", "Akulturasi"], correct: 1, cat: "SOSIOLOGI" },
+            // UMUM/LINGKUNGAN
+            { q: "Limbah plastik termasuk kategori limbah...", a: ["Organik", "Anorganik", "B3", "Cair"], correct: 1, cat: "LINGKUNGAN" },
+            { q: "Gas utama penyebab efek rumah kaca adalah...", a: ["Oksigen", "CO2", "Nitrogen", "Argon"], correct: 1, cat: "LINGKUNGAN" },
+            { q: "Fungsi hutan sebagai penyerap air hujan disebut fungsi...", a: ["Ekonomis", "Klimatologis", "Hidrologis", "Estetis"], correct: 2, cat: "GEOGRAFI" }
+        ];
+
+        let score = 0;
+        let currentQuestionIndex = 0;
+        const targetScore = 1000;
+
+        function startGame() {
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            // Shuffle questions or loop back
+            const q = questions[currentQuestionIndex % questions.length];
+            
+            document.getElementById('category-tag').innerText = q.cat;
+            document.getElementById('question-text').innerText = q.q;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            q.a.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl bg-slate-700 hover:bg-slate-600 border border-slate-600 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-green-500";
+                btn.innerText = option;
+                btn.onclick = () => checkAnswer(index);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            const q = questions[currentQuestionIndex % questions.length];
+            const feedback = document.getElementById('feedback');
+            
+            if (selectedIndex === q.correct) {
+                // Correct
+                score += 100;
+                showFeedback("BENAR! +100", "bg-green-500");
+                currentQuestionIndex++;
+                updateUI();
+                
+                if (score >= targetScore) {
+                    showWinScreen();
+                } else {
+                    setTimeout(loadQuestion, 800);
+                }
+            } else {
+                // Wrong
+                showFeedback("SALAH! -20", "bg-red-500");
+                score = Math.max(0, score - 20);
+                updateUI();
+                // We keep the same question for learning or skip to next
+                setTimeout(loadQuestion, 800);
+                currentQuestionIndex++;
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score-display').innerText = `${score} / ${targetScore}`;
+            const percentage = (score / targetScore) * 100;
+            document.getElementById('score-progress').style.width = `${Math.min(100, percentage)}%`;
+            document.getElementById('level-display').innerText = Math.floor(score / 300) + 1;
+        }
+
+        function showFeedback(text, bgColor) {
+            const feedback = document.getElementById('feedback');
+            feedback.innerText = text;
+            feedback.className = `absolute bottom-10 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full font-bold text-white text-sm shadow-xl transition-all ${bgColor}`;
+            feedback.style.opacity = "1";
+            feedback.style.transform = "translate(-50%, -20px)";
+            
+            setTimeout(() => {
+                feedback.style.opacity = "0";
+                feedback.style.transform = "translate(-50%, 0)";
+            }, 700);
+        }
+
+        function showWinScreen() {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-win').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
